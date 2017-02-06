@@ -1,0 +1,88 @@
+#!/bin/sh
+
+# Print out the help
+usage(){
+    echo "usage: update -p | [-c] | [-s] [-f] | [-h]"
+}
+
+f_sec="false"
+f_port="true"
+f_continue="false"
+f_force="false"
+
+log_file=/tmp/update_script.log
+today=$(date '+%s')
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -p | --ports )			shift
+                                f_port="true"
+                                ;;
+        -s | --security )       shift                          
+                                f_sec="true"
+                                ;;
+		-c | --continue )		shift
+								f_continue="true"
+								;;
+		-f | --force )			shift
+								f_force="true"
+								;;
+        -h | --help )           usage
+                                exit
+                                ;;
+        * )                     usage
+                                exit 1
+    esac
+done
+
+
+# If the script has been called with the right set of arguments 
+if [ "${f_sec}" == "true" ]
+then
+	# Security updates to be checked
+	printf 'Downloading and installing security patch(es)'
+	freebsd-update fetch
+	freebsd-update install
+	printf 'press [ENTER] to continue'
+	read dummy
+fi
+
+if [ "${f_port}" == "true" ]
+then
+	# continue tells the script to skip further updates
+	# and go on updating from the last run
+	if [ "${f_continue}" == "false" ]
+	then
+		# This one gets rid of eventual db corruption
+		if [ "${f_force}" == "true" ]
+		then
+			rm -Rf /var/db/portsnap/
+			mkdir /var/db/portsnap
+		fi
+
+		# fetch the updates
+		portsnap fetch update
+		printf 'press [ENTER] to continue'
+		read dummy
+
+		# list the packages that needs to be updated
+		pkg version -l "<" 
+		printf 'press [ENTER] to continue'
+		read dummy
+
+		# fix DB and remove inconsistencies
+		pkg check -dB -av
+		printf 'press [ENTER] to continue'
+		read dummy
+	fi
+
+	# upgrade all the ports
+	portupgrade -ac
+	echo ${today} > ${log_file}
+	printf 'press [ENTER] to close'
+	read dummy
+	portsclean -D
+	portsclean -DD
+fi
+
+exit 0

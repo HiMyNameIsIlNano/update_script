@@ -1,0 +1,216 @@
+#!/bin/sh
+
+# Start functions
+# Print out the help
+usage(){
+    echo "usage: update_world [-c | [-ue | [-s step_id [-su | [-h]]]]]"
+}
+
+confirm(){
+	printf 'press [ENTER] to continue'
+	read dummy
+}
+
+read_property(){
+	input="$@"
+	temp=`cat $config_file | sed 's/\"//g' | grep -w $input | cut -d ":" -f2`
+	echo ${temp##*|}
+}
+
+timestamp=$(date +%s)
+executed_step=1
+config_file="update_world.config"
+
+f_update="true"
+f_update_existing="false"
+f_singleuser="false"
+f_step="false"
+
+while [ "$1" != "" ]; do
+    case $1 in
+    	-c | --config-file)		shift
+                                #TODO
+                                ;;
+		-ue | --update-existing) shift
+                                f_update_existing="true"
+                                f_update="false"
+                                f_singleuser="false"
+                                ;;
+		-s | --step)		    shift
+                                step=$1
+                                f_step="true"
+                                ;;
+		-su | --single-user )	shift
+                                f_singleuser="true"
+                                f_update="false"
+                                ;;
+        -h | --help )           usage
+                                exit
+                                ;;
+        * )                     usage
+                                exit 1
+    esac
+    shift
+done
+
+# properties="server version branch log folders_to_backup kernel src dest arch"
+server=$(read_property server)
+version=$(read_property version)
+branch=$(read_property branch)
+log=$(read_property log)
+folders_to_backup=$(read_property folders_to_backup)
+kernel=$(read_property kernel)
+dest=$(read_property dest)
+arch=$(read_property arch)
+wlan_if=$(read_property wlan_if)
+keyboard_layout=$(read_property keyboard_layout)
+
+if [ "${f_update}" == "true" ]
+then		
+	if [ $step -le $executed_step ] || [ "${f_step}" == "false" ] 
+	then
+		echo "Step 1) Back-up is starting..."
+		for folder_with_full_path in $folders_to_backup
+		do
+			if [ -d "$folder_with_full_path" ] 
+			then 
+				# It gets the folder name from the full path
+				folder=$(basename $folder_with_full_path)
+				echo "Backing-up" $folder_with_full_path"/ to" $dest"/"$folder$timestamp 
+				confirm
+				mkdir -p $dest/$folder$timestamp
+				cp -rv $folder_with_full_path/ $dest/$folder$timestamp
+			else
+				echo $folder does not exist
+			fi	
+		done
+		
+		echo "Backing-up Kernel to" $dest
+		cp $src/sys/$arch/conf/$kernel $dest/		
+	else
+		echo "Skipped Step 1)"
+	fi
+	
+	executed_step=$((executed_step+1))
+	
+	if [ $step -le $executed_step ] || [ "${f_step}" == "false" ] 
+	then
+		# First checkout
+		if [ "${f_update_existing}" == "true" ]
+		then				
+			echo "Step 2) Checkout Freebsd sources" $branch "version " $version
+			svn checkout https://$server/base/$branch/$version/ $src
+		fi
+		# For all the other updates
+		if [ "${f_update_existing}" == "true" ]
+		then		
+			echo "Step 2) Updating Freebsd sources" $branch "version " $version
+			svn update $src
+			confirm
+		fi
+	else
+		echo "Skipped Step 2)"
+	fi
+	
+	executed_step=$((executed_step+1))
+
+	if [ $step -le $executed_step ] || [ "${f_step}" == "false" ] 
+	then
+		# Various cleaning 
+		echo "Step 3) Perform various cleaning before building world" 
+		chflags -R noschg /usr/obj/*
+		rm -rf /usr/obj
+		confirm
+	else
+		echo "Skipped Step 3)"
+	fi
+
+	executed_step=$((executed_step+1))	
+	cd $src
+		
+	# Output redirection is missing
+	if [ $step -le $executed_step ] || [ "${f_step}" == "false" ] 
+	then
+		echo "Step 4) Building World"
+		make buildworld
+		confirm
+	else
+		echo "Skipped Step 4)"
+	fi
+
+	executed_step=$((executed_step+1))
+	
+	if [ $step -le $executed_step ] || [ "${f_step}" == "false" ] 
+	then
+		echo "Step 5) Building Kernel"
+		make buildkernel KERNCONF=$kernel
+		confirm
+	else
+		echo "Skipped Step 5)"
+	fi
+
+	executed_step=$((executed_step+1))
+		
+	if [ $step -le $executed_step ] || [ "${f_step}" == "false" ] 
+	then	
+		echo "Step 6) Installing Kernel"
+		make installkernel KERNCONF=$kernel
+		confirm
+	else
+		echo "Skipped Step 6)"
+	fi
+
+	echo "Step 7) Reboot the system in single user mode..."
+	echo "Once in single user mode, execute the following command 'mount -u / && mount -a -t ufs' and then run 'update_world -su'" 
+	confirm
+	shutwdown -h now
+fi
+
+if [ "${f_singleuser}" == "true" ]
+then
+	# After reboot in single-user mode
+	# echo "Mount root"
+	# mount -u /
+	# confirm
+
+	# echo "Mounting UFS File System"
+	# mount -a -t ufs
+	# confirm
+
+	echo "Mounting Swap Partition"
+	swapon -a
+	confirm
+
+	# It does not work
+	echo "Keyboar Layout changed to" $keyboard_layout
+	kbdmap $keyboard_layout
+	confirm
+
+	echo "Fixing Timezone"
+	adjkerntz -i
+	confirm
+
+	echo "Start merging"
+	mergemaster -p
+	confirm
+
+	echo "Installing World"
+	cd $src
+	make installworld
+
+	echo "Merging and deleting old libraries"
+	mergemaster -iF
+	make delete-old
+	make delete-old-libs
+
+	read -p "Do you want to recompile all ports? (y/n)" answer
+    case $answer in
+        [Yy]* ) /etc/rc.d/netif;
+				confirm;
+				dhclient $wlan_if
+				confirm;
+				portupgrade -fa
+				break;;
+        [Nn]* ) exit;;
+    esac
+fi

@@ -1,0 +1,41 @@
+#!/bin/sh
+
+read_property(){
+	input="$@"
+	temp=`cat $config_file | sed 's/\"//g' | grep -w $input | cut -d ":" -f2`
+	echo ${temp##*|}
+}
+
+confirm(){
+	printf 'press [ENTER] to continue'
+	read dummy
+}
+
+update_ports_log=/tmp/update_script.log
+update_world_log=/tmp/update_world.log
+config_file="update.config"
+last_exec_update_ports=$(head -n 1 ${update_ports_log})
+last_exec_update_world=$(head -n 1 ${update_world_log})
+today=$(date '+%s')
+
+update_ports_frequency=$(read_property update_frequency_in_days)
+update_world_frequency=$(read_property update_world_frequency_in_days)
+
+days=$(( (today - last_exec_update_ports) / 86400 ))
+echo "Last update ports executed" ${days} "days ago"
+
+# Executed every week 
+if [ $days -gt $update_ports_frequency ]; then
+	#xterm -e "sudo /root/.local/scripts/update"
+	xterm -title "Update Ports" -e su root -c "/root/.local/scripts/update" &
+fi
+
+confirm
+days=$(( (today - last_exec_update_world) / 86400 ))
+echo "Last update world executed" ${days} "days ago"
+
+# Executed every two months 
+if [ $days -gt $update_world_frequency ]; then
+	#xterm -e "sudo /root/.local/scripts/update_world"
+	xterm -title "Update World" -e su root -c "/root/.local/scripts/update_world" &
+fi
