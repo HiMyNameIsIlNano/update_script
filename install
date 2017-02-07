@@ -1,0 +1,13 @@
+#!/bin/sh
+
+cp update_world /root/.local/scripts
+cp update_world.config /root/.local/scripts
+
+cp update_wrapper /usr/local/bin
+cp update.config /usr/local/bin
+
+today=$(date '+%s')
+
+# Configure the two log files 
+echo ${today} > /tmp/update_ports.log
+echo ${today} > /tmp/update_world.log
