@@ -13,13 +13,14 @@ confirm(){
 
 end(){
 	printf 'The user has no right to update'
+	printf '\n'
 	printf 'press [ENTER] to finish'
 	read dummy 
 }
 
 is_user_allowed_to_update(){
-	user=$(whoami)
-	if groups $user | grep &>/dev/null '\bwheel\b'; then
+	group=$(id -G -n $(whoami) | grep -o "wheel")
+	if [ "${group}" == "wheel" ]; then
 		echo true
 	else
 		echo false
@@ -37,7 +38,7 @@ update_ports_frequency=$(read_property update_frequency_in_days)
 update_world_frequency=$(read_property update_world_frequency_in_days)
 is_user_allowed=$(is_user_allowed_to_update)
 
-if [ "${is_user_allowed}" == "false" ] then
+if [ "${is_user_allowed}" == "false" ]; then
 	end
 	exit
 fi
