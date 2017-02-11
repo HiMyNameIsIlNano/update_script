@@ -48,7 +48,7 @@ echo "Last update ports executed" ${days} "days ago"
 
 if [ $days -gt $update_ports_frequency ]; then
 	#xterm -e "sudo /root/.local/scripts/update"
-	xterm -title "Update Ports" -e su root -c "/root/.local/scripts/update" &
+	xterm -title "Update Ports" -e su root -c "${HOME}/.local/scripts/update" &
 fi
 
 confirm
@@ -57,7 +57,7 @@ echo "Last update world executed" ${days} "days ago"
 
 if [ $days -gt $update_world_frequency ]; then
 	#xterm -e "sudo /root/.local/scripts/update_world"
-	xterm -title "Update World" -e su root -c "/root/.local/scripts/update_world" &
+	xterm -title "Update World" -e su root -c "${HOME}/.local/scripts/update_world" &
 fi
 
 exit

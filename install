@@ -1,10 +1,16 @@
 #!/bin/sh
 
-cp update_world /root/.local/scripts
-cp update_world.config /root/.local/scripts
+mkdir -p ${HOME}/.local/scripts
 
-cp update_wrapper /usr/local/bin
-cp update.config /usr/local/bin
+cp update ${HOME}/.local/scripts
+chmod +x ${HOME}/.local/scripts/update
+cp update.config ${HOME}/.local/scripts
+
+cp update_world ${HOME}/.local/scripts
+chmod +x ${HOME}/.local/scripts/update_world
+cp update_world.config ${HOME}/.local/scripts
+
+cp update_wrapper ${HOME}/.local/scripts
 
 today=$(date '+%s')
 
