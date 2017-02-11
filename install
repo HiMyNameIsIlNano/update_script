@@ -17,3 +17,5 @@ today=$(date '+%s')
 # Configure the two log files 
 echo ${today} > /tmp/update_ports.log
 echo ${today} > /tmp/update_world.log
+
+echo '(sleep 60 && /home/Developer/.local/scripts/update_wrapper) &' >> ${HOME}/.config/openbox/autostart.sh
