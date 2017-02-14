@@ -29,7 +29,7 @@ f_step="false"
 while [ "$1" != "" ]; do
     case $1 in
     	-c | --config-file)		shift
-                                #TODO
+                                config_file=$1
                                 ;;
 		-ue | --update-existing) shift
                                 f_update_existing="true"
@@ -96,7 +96,7 @@ then
 	if [ $step -le $executed_step ] || [ "${f_step}" == "false" ] 
 	then
 		# First checkout
-		if [ "${f_update_existing}" == "true" ]
+		if [ "${f_update_existing}" == "false" ]
 		then				
 			echo "Step 2) Checkout Freebsd sources" $branch "version " $version
 			svn checkout https://$server/base/$branch/$version/ $src
@@ -106,8 +106,8 @@ then
 		then		
 			echo "Step 2) Updating Freebsd sources" $branch "version " $version
 			svn update $src
-			confirm
 		fi
+		confirm
 	else
 		echo "Skipped Step 2)"
 	fi

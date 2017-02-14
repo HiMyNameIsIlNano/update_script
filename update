@@ -79,8 +79,6 @@ then
 	# upgrade all the ports
 	portupgrade -ac
 	echo ${today} > ${log_file}
-	printf 'press [ENTER] to close'
-	read dummy
 	portsclean -D
 	portsclean -DD
 fi
