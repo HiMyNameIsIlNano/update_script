@@ -20,6 +20,8 @@ read_property(){
 timestamp=$(date +%s)
 executed_step=1
 config_file="update_world.config"
+log_file=/tmp/update_world.log
+today=$(date '+%s')
 
 f_update="true"
 f_update_existing="false"
@@ -59,6 +61,7 @@ version=$(read_property version)
 branch=$(read_property branch)
 log=$(read_property log)
 folders_to_backup=$(read_property folders_to_backup)
+src=$(read_property src)
 kernel=$(read_property kernel)
 dest=$(read_property dest)
 arch=$(read_property arch)
@@ -69,7 +72,27 @@ if [ "${f_update}" == "true" ]
 then		
 	if [ $step -le $executed_step ] || [ "${f_step}" == "false" ] 
 	then
-		echo "Step 1) Back-up is starting..."
+		# Check if the kernel exists
+		if [ -f "$src/sys/$arch/conf/$kernel" ] 
+		then
+			echo "Backing-up Kernel to" $dest
+			confirm
+			cp $src/sys/$arch/conf/$kernel $dest/
+		else
+			echo "File $src/sys/$arch/conf/$kernel does not exist."
+		fi
+		
+		# Check if src exists
+		if [ -d /usr/src ] 
+		then 
+			echo "Backing-up /usr/src to" $dest/src$timestamp
+			confirm
+			mv $src $dest/src$timestamp
+		else
+			echo "File $src/sys/$arch/conf/$kernel does not exist."
+		fi
+		
+		echo "Step 1) Back-up of additional folder(s) is starting..."
 		for folder_with_full_path in $folders_to_backup
 		do
 			if [ -d "$folder_with_full_path" ] 
@@ -81,12 +104,9 @@ then
 				mkdir -p $dest/$folder$timestamp
 				cp -rv $folder_with_full_path/ $dest/$folder$timestamp
 			else
-				echo $folder does not exist
+				echo $folder_with_full_path does not exist
 			fi	
-		done
-		
-		echo "Backing-up Kernel to" $dest
-		cp $src/sys/$arch/conf/$kernel $dest/		
+		done		
 	else
 		echo "Skipped Step 1)"
 	fi
@@ -99,12 +119,14 @@ then
 		if [ "${f_update_existing}" == "false" ]
 		then				
 			echo "Step 2) Checkout Freebsd sources" $branch "version " $version
+			confirm
 			svn checkout https://$server/base/$branch/$version/ $src
 		fi
 		# For all the other updates
 		if [ "${f_update_existing}" == "true" ]
 		then		
 			echo "Step 2) Updating Freebsd sources" $branch "version " $version
+			confirm
 			svn update $src
 		fi
 		confirm
@@ -160,8 +182,10 @@ then
 		echo "Skipped Step 6)"
 	fi
 
+	echo ${today} > ${log_file}
+
 	echo "Step 7) Reboot the system in single user mode..."
-	echo "Once in single user mode, execute the following command 'mount -u / && mount -a -t ufs' and then run 'update_world -su'" 
+	echo "Once in single user mode, execute the following command 'mount -u / && mount -a -t ufs' and then run '%install_dir%/update_world -su'" 
 	confirm
 	shutwdown -h now
 fi
@@ -203,7 +227,7 @@ then
 	make delete-old
 	make delete-old-libs
 
-	read -p "Do you want to recompile all ports? (y/n)" answer
+	read -p "Do you want to recompile all ports? (y/n): " answer
     case $answer in
         [Yy]* ) /etc/rc.d/netif;
 				confirm;
