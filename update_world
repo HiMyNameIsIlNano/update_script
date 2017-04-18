@@ -18,6 +18,7 @@ read_property(){
 }
 
 timestamp=$(date +%s)
+step=1
 executed_step=1
 config_file="update_world.config"
 log_file=/tmp/update_world.log
