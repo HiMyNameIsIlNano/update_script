@@ -2,13 +2,15 @@
 
 # Print out the help
 usage(){
-    echo "usage: update -p | [-c] | [-s] [-f] | [-h]"
+    echo "usage: update -p | [-c] | [-s] [-f] [-b] | [-h]"
 }
 
 f_sec="false"
 f_port="true"
 f_continue="false"
 f_force="false"
+f_batch="false"
+
 
 log_file=/tmp/update_script.log
 today=$(date '+%s')
@@ -26,6 +28,9 @@ while [ "$1" != "" ]; do
 								;;
 		-f | --force )			shift
 								f_force="true"
+								;;
+		-b | --batch )			shift
+								f_batch="true"
 								;;
         -h | --help )           usage
                                 exit
@@ -62,18 +67,27 @@ then
 
 		# fetch the updates
 		portsnap fetch update
-		printf 'press [ENTER] to continue'
-		read dummy
+		if [ "${f_batch}" == "true" ]
+		then
+			printf 'press [ENTER] to continue'
+			read dummy
+		fi
 
 		# list the packages that needs to be updated
 		pkg version -l "<" 
-		printf 'press [ENTER] to continue'
-		read dummy
+		if [ "${f_batch}" == "true" ]
+		then
+			printf 'press [ENTER] to continue'
+			read dummy
+		fi
 
 		# fix DB and remove inconsistencies
 		pkg check -dB -av
-		printf 'press [ENTER] to continue'
-		read dummy
+		if [ "${f_batch}" == "true" ]
+		then
+			printf 'press [ENTER] to continue'
+			read dummy
+		fi
 	fi
 
 	# upgrade all the ports
