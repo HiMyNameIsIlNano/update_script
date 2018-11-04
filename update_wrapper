@@ -41,6 +41,7 @@ update_ports_frequency=$(read_property update_frequency_in_days)
 update_world_frequency=$(read_property update_world_frequency_in_days)
 is_user_allowed=$(is_user_allowed_to_update)
 batch_update_flag=$(read_property batch)
+update_with=$(read_property update_with)
 
 if [ "${is_user_allowed}" == "false" ]; then
 	end
@@ -57,8 +58,14 @@ days=$(( (today - last_exec_update_ports) / 86400 ))
 echo "Last update ports executed" ${days} "days ago"
 
 if [ $days -gt $update_ports_frequency ]; then
-	#xterm -e "sudo /root/.local/scripts/update"
-	xterm -title "Update Ports" -e su root -c "${HOME}/.local/scripts/update ${batch}"
+	if [ "${update_with}" == "pkg" ]; then
+		xterm -title "Update Ports" -e su root -c "${HOME}/.local/scripts/update_pkg"
+	else if [ "${update_with}" == "port" ]; then
+		xterm -title "Update Ports" -e su root -c "${HOME}/.local/scripts/update ${batch}"
+	else
+		echo "[ERROR] Option not recognised"
+		exit 1
+	fi
 fi
 
 days=$(( (today - last_exec_update_world) / 86400 ))
@@ -66,7 +73,6 @@ echo "Last update world executed" ${days} "days ago"
 
 if [ $days -gt $update_world_frequency ]; then
 	confirm
-	#xterm -e "sudo /root/.local/scripts/update_world"
 	xterm -title "Update World" -e su root -c "${HOME}/.local/scripts/update_world -c ${config_world_file}"
 fi
 

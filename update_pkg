@@ -1,0 +1,66 @@
+#!/bin/sh
+
+usage(){
+    echo "usage: update_pkg [-c | [-h]]"
+}
+
+wait_for_input(){
+	printf 'press [ENTER] to continue'
+	read dummy
+}
+
+read_property(){
+	input="$@"
+	temp=`cat $config_file | sed 's/\"//g' | grep -w $input | cut -d ":" -f2`
+	echo ${temp##*|}
+}
+
+default_dir=${HOME}/.local/scripts
+config_file=${default_dir}/update.config
+
+while [ "$1" != "" ]; do
+    case $1 in
+		-c | --config )		    shift
+                                config_file=$1
+                                echo $config_file
+                                ;;
+        -h | --help )           usage
+                                exit
+                                ;;
+        * )                     usage
+                                exit 1
+    esac
+    shift
+done
+
+log_file=/tmp/update_script.log
+today=$(date '+%s')
+
+# The list of locked ports must be comma separated with no empty space
+locked_ports=$(read_property locked_ports)
+for locked_port in $(echo $locked_ports | sed "s/,/ /g")
+do
+    pkg lock $locked_port
+	wait_for_input
+done
+
+pkg stats
+wait_for_input
+	
+pkg update
+wait_for_input
+
+pkg upgrade
+wait_for_input
+
+pkg check
+wait_for_input
+
+pkg autoremove
+wait_for_input
+
+pkg clean
+wait_for_input
+
+echo ${today} > ${log_file}
+exit 0
