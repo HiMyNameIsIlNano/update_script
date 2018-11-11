@@ -32,6 +32,7 @@ update_world_log=/tmp/update_world.log
 default_dir=${HOME}/.local/scripts
 config_file=${default_dir}/update.config
 config_world_file=${default_dir}/update_world.config
+batch_update=''
 
 last_exec_update_ports=$(head -n 1 ${update_ports_log})
 last_exec_update_world=$(head -n 1 ${update_world_log})
@@ -48,10 +49,8 @@ if [ "${is_user_allowed}" == "false" ]; then
 	exit
 fi
 
-if [ "${batch_update_flag}" == "false" ]; then
-	batch = ''
-else 
-	batch = '-b'
+if [ "${batch_update_flag}" == "true" ]; then
+	batch_update='-b'
 fi
 
 days=$(( (today - last_exec_update_ports) / 86400 ))
@@ -59,9 +58,9 @@ echo "Last update ports executed" ${days} "days ago"
 
 if [ $days -gt $update_ports_frequency ]; then
 	if [ "${update_with}" == "pkg" ]; then
-		xterm -title "Update Ports" -e su root -c "${HOME}/.local/scripts/update_pkg"
-	else if [ "${update_with}" == "port" ]; then
-		xterm -title "Update Ports" -e su root -c "${HOME}/.local/scripts/update ${batch}"
+		xterm -title "Update Ports with PKG" -e su root -c "${HOME}/.local/scripts/update_pkg"
+	elif [ "${update_with}" == "port" ]; then
+		xterm -title "Update Ports with PORTUPGRADE" -e su root -c "${HOME}/.local/scripts/update ${batch_update}"
 	else
 		echo "[ERROR] Option not recognised"
 		exit 1

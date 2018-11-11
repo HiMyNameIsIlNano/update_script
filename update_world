@@ -194,21 +194,16 @@ fi
 if [ "${f_singleuser}" == "true" ]
 then
 	# After reboot in single-user mode
-	# echo "Mount root"
-	# mount -u /
-	# confirm
-
-	# echo "Mounting UFS File System"
-	# mount -a -t ufs
+	# echo "Mount root and Mounting UFS File System"
+	# mount -u / && mount -a -t ufs
 	# confirm
 
 	echo "Mounting Swap Partition"
 	swapon -a
 	confirm
 
-	# It does not work
 	echo "Keyboar Layout changed to" $keyboard_layout
-	kbdmap $keyboard_layout
+	setxkbmap $keyboard_layout
 	confirm
 
 	echo "Fixing Timezone"
