@@ -20,4 +20,7 @@ today=$(date '+%s')
 echo ${today} > ${default_dir}/update_ports.log
 echo ${today} > ${default_dir}/update_world.log
 
-echo "(sleep 60 && ${default_dir}/update_wrapper) &" >> ${HOME}/.config/openbox/autostart.sh
+if [ -d "${HOME}/.config/openbox" ]; then
+  echo "(sleep 60 && ${default_dir}/update_wrapper) &" >> ${HOME}/.config/openbox/autostart.sh
+fi
+
