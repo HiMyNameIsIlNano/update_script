@@ -44,22 +44,22 @@ do
 	wait_for_input
 done
 
-pkg stats
+sudo pkg stats
 wait_for_input
 	
-pkg update
+sudo pkg update
 wait_for_input
 
-pkg upgrade
+sudo pkg upgrade
 wait_for_input
 
-pkg check
+sudo pkg check
 wait_for_input
 
-pkg autoremove
+sudo pkg autoremove
 wait_for_input
 
-pkg clean
+sudo pkg clean
 wait_for_input
 
 echo ${today} > ${log_file}

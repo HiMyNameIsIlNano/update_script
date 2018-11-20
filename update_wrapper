@@ -67,7 +67,7 @@ confirm
 if [ $days -gt $update_ports_frequency ]; then
 	if [ "${update_with}" == "pkg" ]; then
 		#xterm -title "Update Ports with PKG" -e su root -c "${HOME}/.local/scripts/update_pkg"
-		xterm -title "Update Ports with PKG" -hold -e "sudo ${HOME}/.local/scripts/update_pkg"
+		xterm -title "Update Ports with PKG" -hold -e "${HOME}/.local/scripts/update_pkg"
 	elif [ "${update_with}" == "port" ]; then
 		if [ "${is_user_allowed}" == "false" ]; then
 			end
