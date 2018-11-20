@@ -37,7 +37,7 @@ is_user_allowed_to_update(){
 default_dir=${HOME}/.local/scripts
 config_file=${default_dir}/update.config
 config_world_file=${default_dir}/update_world.config
-update_ports_log=${default_dir}/update_script.log
+update_ports_log=${default_dir}/update_ports.log
 update_world_log=${default_dir}/update_world.log
 batch_update=''
 

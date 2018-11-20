@@ -12,6 +12,9 @@ cp update_world ${default_dir}
 chmod +x ${default_dir}/update_world
 cp update_world.config ${default_dir}
 
+cp update_pkg ${default_dir}
+chmod +x ${default_dir}/update_pkg
+
 cp update_wrapper ${default_dir}
 
 today=$(date '+%s')
