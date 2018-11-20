@@ -40,7 +40,7 @@ today=$(date '+%s')
 locked_ports=$(read_property locked_ports)
 for locked_port in $(echo $locked_ports | sed "s/,/ /g")
 do
-    pkg lock $locked_port
+    sudo pkg lock $locked_port
 	wait_for_input
 done
 
