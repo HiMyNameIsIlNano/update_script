@@ -1,21 +1,23 @@
 #!/bin/sh
 
-mkdir -p ${HOME}/.local/scripts
+default_dir=${HOME}/.local/scripts
 
-cp update ${HOME}/.local/scripts
-chmod +x ${HOME}/.local/scripts/update
-cp update.config ${HOME}/.local/scripts
+mkdir -p ${default_dir}
 
-cp update_world ${HOME}/.local/scripts
-chmod +x ${HOME}/.local/scripts/update_world
-cp update_world.config ${HOME}/.local/scripts
+cp update ${default_dir}
+chmod +x ${default_dir}/update
+cp update.config ${default_dir}
 
-cp update_wrapper ${HOME}/.local/scripts
+cp update_world ${default_dir}
+chmod +x ${default_dir}/update_world
+cp update_world.config ${default_dir}
+
+cp update_wrapper ${default_dir}
 
 today=$(date '+%s')
 
 # Configure the two log files 
-echo ${today} > /tmp/update_ports.log
-echo ${today} > /tmp/update_world.log
+echo ${today} > ${default_dir}/update_ports.log
+echo ${today} > ${default_dir}/update_world.log
 
-echo "(sleep 60 && ${HOME}/.local/scripts/update_wrapper) &" >> ${HOME}/.config/openbox/autostart.sh
+echo "(sleep 60 && ${default_dir}/update_wrapper) &" >> ${HOME}/.config/openbox/autostart.sh

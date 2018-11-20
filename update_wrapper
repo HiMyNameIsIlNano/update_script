@@ -11,6 +11,13 @@ confirm(){
 	read dummy
 }
 
+error(){
+	printf 'The default directory does not exist'
+	printf '\n'
+	printf 'press [ENTER] to finish'
+	read dummy 
+}
+
 end(){
 	printf 'The user has no right to update'
 	printf '\n'
@@ -27,11 +34,11 @@ is_user_allowed_to_update(){
 	fi
 }
 
-update_ports_log=/tmp/update_script.log
-update_world_log=/tmp/update_world.log
 default_dir=${HOME}/.local/scripts
 config_file=${default_dir}/update.config
 config_world_file=${default_dir}/update_world.config
+update_ports_log=${default_dir}/update_script.log
+update_world_log=${default_dir}/update_world.log
 batch_update=''
 
 last_exec_update_ports=$(head -n 1 ${update_ports_log})
@@ -44,9 +51,8 @@ is_user_allowed=$(is_user_allowed_to_update)
 batch_update_flag=$(read_property batch)
 update_with=$(read_property update_with)
 
-if [ "${is_user_allowed}" == "false" ]; then
-	#end
-	#exit
+if [ ! -d "${default_dir}" ]; then
+  error
 fi
 
 if [ "${batch_update_flag}" == "true" ]; then
@@ -63,6 +69,10 @@ if [ $days -gt $update_ports_frequency ]; then
 		#xterm -title "Update Ports with PKG" -e su root -c "${HOME}/.local/scripts/update_pkg"
 		xterm -title "Update Ports with PKG" -hold -e "sudo ${HOME}/.local/scripts/update_pkg"
 	elif [ "${update_with}" == "port" ]; then
+		if [ "${is_user_allowed}" == "false" ]; then
+			end
+			exit
+		fi		
 		xterm -title "Update Ports with PORTUPGRADE" -hold -e su root -c "${HOME}/.local/scripts/update ${batch_update}"
 	else
 		echo "[ERROR] Option not recognised"
