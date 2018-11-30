@@ -33,7 +33,8 @@ while [ "$1" != "" ]; do
     shift
 done
 
-log_file=/tmp/update_script.log
+default_dir=${HOME}/.local/scripts
+log_file=${default_dir}/update_ports.log
 today=$(date '+%s')
 
 # The list of locked ports must be comma separated with no empty space
