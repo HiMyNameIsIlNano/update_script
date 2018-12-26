@@ -54,9 +54,10 @@ wait_for_input
 sudo pkg upgrade
 wait_for_input
 
-echo "Checking for missing dependencies..."
-sudo pkg check -n
-wait_for_input
+# Even though the n option is listed in the pkg check manual, it does not seem to be a recognized option anyway...
+#echo "Checking for missing dependencies..."
+#sudo pkg check -n
+#wait_for_input
 
 echo "Checking for corrupted packages..."
 sudo pkg check -sa
