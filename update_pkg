@@ -15,6 +15,10 @@ read_property(){
 	echo ${temp##*|}
 }
 
+check_remote_changes() {
+	# Do Something
+}
+
 default_dir=${HOME}/.local/scripts
 config_file=${default_dir}/update.config
 
