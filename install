@@ -1,6 +1,7 @@
 #!/bin/sh
 
 default_dir=${HOME}/.local/scripts
+cmd="(sleep 60 && ${default_dir}/update_wrapper) &"
 
 mkdir -p ${default_dir}
 
@@ -19,11 +20,20 @@ cp update_wrapper ${default_dir}
 
 today=$(date '+%s')
 
-# Configure the two log files 
-echo ${today} > ${default_dir}/update_ports.log
-echo ${today} > ${default_dir}/update_world.log
-
-if [ -d "${HOME}/.config/openbox" ]; then
-  echo "(sleep 60 && ${default_dir}/update_wrapper) &" >> ${HOME}/.config/openbox/autostart.sh
+# Configure the two log files if they do not already exist 
+if [ ! -f ${default_dir}/update_ports.log ]; then 
+	echo ${today} > ${default_dir}/update_ports.log
 fi
 
+if [ ! -f ${default_dir}/update_world.log ]; then 
+	echo ${today} > ${default_dir}/update_world.log
+fi
+
+if [ -d "${HOME}/.config/openbox" ]; then  
+	if grep -Fxq "${cmd}" ${HOME}/.config/openbox/autostart.sh
+	then
+		echo "No need to add update_wrapper to autostart.sh as it is already present"
+	else
+		echo ${cmd} >> ${HOME}/.config/openbox/autostart.sh
+	fi
+fi
