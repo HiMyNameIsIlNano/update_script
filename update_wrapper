@@ -84,6 +84,10 @@ days=$(( (today - last_exec_update_world) / 86400 ))
 echo "Last update world executed" ${days} "days ago"
 
 if [ $days -gt $update_world_frequency ]; then
+	if [ "${is_user_allowed}" == "false" ]; then
+		end
+		exit
+	fi	
 	confirm
 	xterm -title "Update World" -hold -e su root -c "${HOME}/.local/scripts/update_world -c ${config_world_file}"
 fi
