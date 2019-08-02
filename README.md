@@ -8,3 +8,10 @@ This utility makes use of a wrapper and can be used by all users with *su* capab
 command, or in the case of *pkg* updates by sudo enabled users. 
 
 In addition to that, the update_wrapper can be automatically started by those making use of *openbox*   
+
+### TODO
+
+- [ ] Add .gitignore
+- [ ] Add a check requirements function in the update_wrapper that checks for a user's privilege. If the user has no privilege, do not start the process. If yes, then call the update.
+- [ ] Remove the logic for the update_wrapper for the scheduling of the "job" as we will leverage on cron scheduled scripts.
+- [ ] Remove all the scheduler logic from the installer and add an insert into the cron schedule.
