@@ -1,21 +1,21 @@
 #!/bin/sh
 
-usage(){
+__usage(){
     echo "usage: update_pkg [-c | [-h]]"
 }
 
-wait_for_input(){
+__wait_for_input(){
 	printf 'press [ENTER] to continue'
 	read dummy
 }
 
-read_property(){
+__read_property(){
 	input="$@"
 	temp=`cat $config_file | sed 's/\"//g' | grep -w $input | cut -d ":" -f2`
 	echo ${temp##*|}
 }
 
-check_remote_changes() {
+__check_remote_changes() {
 	UPSTREAM=${1:-'@{u}'}
 	LOCAL=$(git rev-parse @)
 	REMOTE=$(git rev-parse "$UPSTREAM")
@@ -41,10 +41,10 @@ while [ "$1" != "" ]; do
                                 config_file=$1
                                 echo $config_file
                                 ;;
-        -h | --help )           usage
+        -h | --help )           __usage
                                 exit
                                 ;;
-        * )                     usage
+        * )                     __usage
                                 exit 1
     esac
     shift
@@ -55,21 +55,21 @@ log_file=${default_dir}/update_ports.log
 today=$(date '+%s')
 
 # The list of locked ports must be comma separated with no empty space
-locked_ports=$(read_property locked_ports)
+locked_ports=$(__read_property locked_ports)
 for locked_port in $(echo $locked_ports | sed "s/,/ /g")
 do
     sudo pkg lock $locked_port
-	wait_for_input
+	__wait_for_input
 done
 
 sudo pkg stats
-wait_for_input
+__wait_for_input
 	
 sudo pkg update
-wait_for_input
+__wait_for_input
 
 sudo pkg upgrade
-wait_for_input
+__wait_for_input
 
 # Even though the n option is listed in the pkg check manual, it does not seem to be a recognized option anyway...
 #echo "Checking for missing dependencies..."
@@ -78,13 +78,13 @@ wait_for_input
 
 echo "Checking for corrupted packages..."
 sudo pkg check -sa
-wait_for_input
+__wait_for_input
 
 sudo pkg autoremove
-wait_for_input
+__wait_for_input
 
 sudo pkg clean
-wait_for_input
+__wait_for_input
 
 echo ${today} > ${log_file}
 exit 0

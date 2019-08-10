@@ -1,12 +1,18 @@
 #!/bin/sh
 
+__read_property(){
+	local input="$@"
+	temp=`cat ${config_file} | sed 's/\"//g' | grep -w ${input} | cut -d ":" -f2`
+	echo ${temp##*|}
+}
+
 default_dir=${HOME}/.local/scripts
-cmd="(sleep 90 && ${default_dir}/update_wrapper) &"
+config_file=${default_dir}/update.config
 
 mkdir -p ${default_dir}
 
 cp update ${default_dir}
-chmod +x ${default_dir}/update
+chmod +x ${default_dir}/update_ports
 cp update.config ${default_dir}
 
 cp update_world ${default_dir}
@@ -18,22 +24,11 @@ chmod +x ${default_dir}/update_pkg
 
 cp update_wrapper ${default_dir}
 
-today=$(date '+%s')
+# TODO: Check these two
+# Add cronjob expression(s) one for update pkg and one for update world
+update_ports_freq_in_days=$(__read_property update_ports_freq_in_days)
+echo "* * */${update_ports_freq_in_days} * * ${HOME}/.local/scripts/update_wrapper -p >/dev/null 2>&1"  >> /var/cron/tabs
 
-# Configure the two log files if they do not already exist 
-if [ ! -f ${default_dir}/update_ports.log ]; then 
-	echo ${today} > ${default_dir}/update_ports.log
-fi
+update_world_freq_in_days=$(__read_property update_world_freq_in_days)
+echo "* * */${update_world_freq_in_days} * * ${HOME}/.local/scripts/update_wrapper -w >/dev/null 2>&1" >> /var/cron/tabs
 
-if [ ! -f ${default_dir}/update_world.log ]; then 
-	echo ${today} > ${default_dir}/update_world.log
-fi
-
-if [ -d "${HOME}/.config/openbox" ]; then  
-	if grep -Fxq "${cmd}" ${HOME}/.config/openbox/autostart.sh
-	then
-		echo "No need to add update_wrapper to autostart.sh as it is already present"
-	else
-		echo ${cmd} >> ${HOME}/.config/openbox/autostart.sh
-	fi
-fi

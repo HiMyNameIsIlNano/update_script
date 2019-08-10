@@ -1,11 +1,11 @@
 #!/bin/sh
 
 # Print out the help
-usage(){
-    echo "usage: update -p | [-c] | [-s] [-f] [-b] | [-h]"
+__usage(){
+    echo "usage: update_ports -p | [-c] | [-s] [-f] [-b] | [-h]"
 }
 
-wait_for_input(){
+__wait_for_input(){
 	printf 'press [ENTER] to continue'
 	read dummy
 }
@@ -36,10 +36,10 @@ while [ "$1" != "" ]; do
 		-b | --batch )			shift
 								f_batch="true"
 								;;
-        -h | --help )           usage
+        -h | --help )           __usage
                                 exit
                                 ;;
-        * )                     usage
+        * )                     __usage
                                 exit 1
     esac
 done
@@ -73,21 +73,21 @@ then
 		portsnap fetch update
 		if [ "${f_batch}" == "true" ]
 		then
-			wait_for_input
+			__wait_for_input
 		fi
 
 		# list the packages that needs to be updated
 		pkg version -l "<" 
 		if [ "${f_batch}" == "true" ]
 		then
-			wait_for_input
+			__wait_for_input
 		fi
 
 		# fix DB and remove inconsistencies
 		pkg check -dB -av
 		if [ "${f_batch}" == "true" ]
 		then
-			wait_for_input
+			__wait_for_input
 		fi
 	fi
 

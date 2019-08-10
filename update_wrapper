@@ -1,33 +1,39 @@
 #!/bin/sh
 
-read_property(){
-	input="$@"
-	temp=`cat $config_file | sed 's/\"//g' | grep -w $input | cut -d ":" -f2`
+# Print out the help
+__usage(){
+    echo "usage: update_wrapper [-p | [-w | [-h]]]"
+}
+
+__read_property(){
+	local input="$@"
+	temp=`cat ${config_file} | sed 's/\"//g' | grep -w ${input} | cut -d ":" -f2`
 	echo ${temp##*|}
 }
 
-confirm(){
+__confirm(){
 	printf 'press [ENTER] to continue'
 	read dummy
 }
 
-error(){
+__error(){
 	printf 'The default directory does not exist'
 	printf '\n'
 	printf 'press [ENTER] to finish'
 	read dummy 
 }
 
-end(){
+__end(){
 	printf 'The user has no right to update'
 	printf '\n'
 	printf 'press [ENTER] to finish'
 	read dummy 
 }
 
-is_user_allowed_to_update(){
-	group=$(id -G -n $(whoami) | grep -o "wheel")
-	if [ "${group}" == "wheel" ]; then
+__is_user_allowed_to_update(){
+	local updater_group="$1"
+	local group=$(id -G -n $(whoami) | grep -o ${updater_group})
+	if [ "${group}" == "${updater_group}" ]; then
 		echo true
 	else
 		echo false
@@ -40,56 +46,63 @@ config_world_file=${default_dir}/update_world.config
 update_ports_log=${default_dir}/update_ports.log
 update_world_log=${default_dir}/update_world.log
 batch_update=''
+f_port="true"
+f_world="false"
 
-last_exec_update_ports=$(head -n 1 ${update_ports_log})
-last_exec_update_world=$(head -n 1 ${update_world_log})
-today=$(date '+%s')
+while [ "$1" != "" ]; do
+    case $1 in
+        -p | --ports )			shift
+                                f_port="true"
+                                f_world="false"
+                                ;;
+        -w | --world )          shift
+                                f_world="true"
+                                f_port="false"
+                                ;;
+        -h | --help )           __usage
+                                exit
+                                ;;
+        * )                     __usage
+                                exit 1
+    esac
+done
 
-update_ports_frequency=$(read_property update_frequency_in_days)
-update_world_frequency=$(read_property update_world_frequency_in_days)
-is_user_allowed=$(is_user_allowed_to_update)
-batch_update_flag=$(read_property batch)
-update_with=$(read_property update_with)
+batch_update_flag=$(__read_property batch)
+update_with=$(__read_property update_with)
+updater_group=$(__read_property updater_group)
+is_user_allowed_to_update=$(__is_user_allowed_to_update ${updater_group})
+
+if [ "${is_user_allowed_to_update}" == "false" ]; then
+    __end
+    exit 1
+fi
 
 if [ ! -d "${default_dir}" ]; then
-  error
+  __error
+  exit 1
 fi
 
 if [ "${batch_update_flag}" == "true" ]; then
 	batch_update='-b'
 fi
 
-days=$(( (today - last_exec_update_ports) / 86400 ))
-echo "Last update ports executed" ${days} "days ago"
+if [ "${f_port}" == "true" ]; then
+	__confirm
 
-confirm
-
-if [ $days -gt $update_ports_frequency ]; then
 	if [ "${update_with}" == "pkg" ]; then
 		#xterm -title "Update Ports with PKG" -e su root -c "${HOME}/.local/scripts/update_pkg"
 		xterm -title "Update Ports with PKG" -hold -e "${HOME}/.local/scripts/update_pkg"
 	elif [ "${update_with}" == "port" ]; then
-		if [ "${is_user_allowed}" == "false" ]; then
-			end
-			exit
-		fi		
-		xterm -title "Update Ports with PORTUPGRADE" -hold -e su root -c "${HOME}/.local/scripts/update ${batch_update}"
+		xterm -title "Update Ports with PORTUPGRADE" -hold -e su root -c "${HOME}/.local/scripts/update_ports ${batch_update}"
 	else
 		echo "[ERROR] Option not recognised"
 		exit 1
 	fi
 fi
 
-days=$(( (today - last_exec_update_world) / 86400 ))
-echo "Last update world executed" ${days} "days ago"
-
-if [ $days -gt $update_world_frequency ]; then
-	if [ "${is_user_allowed}" == "false" ]; then
-		end
-		exit
-	fi	
-	confirm
+if [ "${f_world}" == "true" ]; then
+	__confirm
 	xterm -title "Update World" -hold -e su root -c "${HOME}/.local/scripts/update_world -c ${config_world_file}"
 fi
 
-exit
+exit 0
