@@ -24,11 +24,13 @@ chmod +x ${default_dir}/update_pkg
 
 cp update_wrapper ${default_dir}
 
-# TODO: Check these two
-# Add cronjob expression(s) one for update pkg and one for update world
-update_ports_freq_in_days=$(__read_property update_ports_freq_in_days)
-echo "* * */${update_ports_freq_in_days} * * ${HOME}/.local/scripts/update_wrapper -p >/dev/null 2>&1"  >> /var/cron/tabs
+update_ports_frequency_in_days=$(__read_property update_ports_frequency_in_days)
+(crontab -l; echo "* * */${update_ports_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -p >/dev/null 2>&1" ) | crontab -
 
-update_world_freq_in_days=$(__read_property update_world_freq_in_days)
-echo "* * */${update_world_freq_in_days} * * ${HOME}/.local/scripts/update_wrapper -w >/dev/null 2>&1" >> /var/cron/tabs
+update_world_frequency_in_days=$(__read_property update_world_frequency_in_days)
+(crontab -l; echo "* * */${update_world_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -w >/dev/null 2>&1" ) | crontab -
 
+# Check the crontab file before ending the script
+crontab -e
+
+exit 0
