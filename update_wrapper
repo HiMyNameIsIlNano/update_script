@@ -71,6 +71,7 @@ batch_update_flag=$(__read_property batch)
 update_with=$(__read_property update_with)
 updater_group=$(__read_property updater_group)
 is_user_allowed_to_update=$(__is_user_allowed_to_update ${updater_group})
+xterm=$(command -v xterm)
 
 if [ "${is_user_allowed_to_update}" == "false" ]; then
     __end
@@ -91,9 +92,9 @@ if [ "${f_port}" == "true" ]; then
 
 	if [ "${update_with}" == "pkg" ]; then
 		#xterm -title "Update Ports with PKG" -e su root -c "${HOME}/.local/scripts/update_pkg"
-		xterm -title "Update Ports with PKG" -hold -e "${HOME}/.local/scripts/update_pkg"
+		${xterm} -title "Update Ports with PKG" -hold -e "${HOME}/.local/scripts/update_pkg"
 	elif [ "${update_with}" == "port" ]; then
-		xterm -title "Update Ports with PORTUPGRADE" -hold -e su root -c "${HOME}/.local/scripts/update_ports ${batch_update}"
+		${xterm} -title "Update Ports with PORTUPGRADE" -hold -e su root -c "${HOME}/.local/scripts/update_ports ${batch_update}"
 	else
 		echo "[ERROR] Option not recognised"
 		exit 1
@@ -102,7 +103,7 @@ fi
 
 if [ "${f_world}" == "true" ]; then
 	__confirm
-	xterm -title "Update World" -hold -e su root -c "${HOME}/.local/scripts/update_world -c ${config_world_file}"
+	${xterm} -title "Update World" -hold -e su root -c "${HOME}/.local/scripts/update_world -c ${config_world_file}"
 fi
 
 exit 0
