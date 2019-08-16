@@ -8,6 +8,9 @@ __read_property(){
 
 default_dir=${HOME}/.local/scripts
 config_file=${default_dir}/update.config
+timestamp=$(date +%s)
+update_ports_frequency_in_days=$(__read_property update_ports_frequency_in_days)
+update_world_frequency_in_days=$(__read_property update_world_frequency_in_days)
 
 mkdir -p ${default_dir}
 
@@ -24,13 +27,29 @@ chmod +x ${default_dir}/update_pkg
 
 cp update_wrapper ${default_dir}
 
-update_ports_frequency_in_days=$(__read_property update_ports_frequency_in_days)
-(crontab -l; echo "* * */${update_ports_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -p >/dev/null 2>&1" ) | crontab -
+cat >> /tmp/crontab_${timestamp}.tmp <<'EOF'
+SHELL=/bin/sh
+PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin
+DISPLAY=:0.0
+# Order of crontab fields
+# minute	hour	mday	month	wday	command
+* * */${update_ports_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -p >/dev/null 2>&1
+* * */${update_world_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -w >/dev/null 2>&1
+EOF
 
-update_world_frequency_in_days=$(__read_property update_world_frequency_in_days)
-(crontab -l; echo "* * */${update_world_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -w >/dev/null 2>&1" ) | crontab -
+# Copy the current crontab into a temporary file
+crontab -l > /tmp/current_crontab.tmp
+
+# Interactive diff
+sdiff -o /tmp/current_crontab.final current_crontab.tmp /tmp/crontab_${timestamp}.tmp
+
+(crontab -l; cat /tmp/current_crontab.final | crontab -
 
 # Check the crontab file before ending the script
 crontab -e
+
+rm /tmp/crontab_${timestamp}.tmp
+rm /tmp/current_crontab.tmp
+rm /tmp/current_crontab.final
 
 exit 0
