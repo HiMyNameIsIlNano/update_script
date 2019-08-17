@@ -37,13 +37,32 @@ DISPLAY=:0.0
 * * */${update_world_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -w >/dev/null 2>&1
 EOF
 
+crontab -l
+if [ $? -eq 1 ]
+then
+    # No crontab existing. Create an empty file
+    cat >> /tmp/empty_crontab_${timestamp}.tmp <<'EOF'
+SHELL=/bin/sh
+PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin
+DISPLAY=:0.0
+# Order of crontab fields
+# minute	hour	mday	month	wday	command
+EOF
+    cat empty_crontab_${timestamp}.tmp | crontab -
+    rm empty_crontab_${timestamp}.tmp
+fi
+
 # Copy the current crontab into a temporary file
 crontab -l > /tmp/current_crontab.tmp
 
-# Interactive diff
-sdiff -o /tmp/current_crontab.final current_crontab.tmp /tmp/crontab_${timestamp}.tmp
+# Merge the changes into a final file
+sdiff -o /tmp/current_crontab.final /tmp/current_crontab.tmp /tmp/crontab_${timestamp}.tmp
 
-(crontab -l; cat /tmp/current_crontab.final | crontab -
+# We do not need to append anything as the crontab has already been merged
+# (crontab -l; cat /tmp/current_crontab.final | crontab -
+
+# Put the merged entries into the crontab file
+cat /tmp/current_crontab.final | crontab -
 
 # Check the crontab file before ending the script
 crontab -e
