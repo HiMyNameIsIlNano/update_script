@@ -1,5 +1,5 @@
 # update_script 
-A Simple Script to update a Freebsd install. 
+A Simple Script to update one's Freebsd installation. 
 
 ### Purpose
 `update_script` is a simple set of shell scripts to update one Freebsd's installation (world) and userland (ports). The script comes with a 
@@ -13,16 +13,9 @@ tbd
 
 # How to use install the scripts:
 ```
-fetch --no-verify-hostname --no-verify-peer -o /tmp/update_script.gz https://api.github.com/repos/HiMyNameIsIlNano/update_script/tarball/master
+fetch --no-verify-hostname --no-verify-peer -o /tmp/update_script.tgz https://api.github.com/repos/HiMyNameIsIlNano/update_script/tarball/master
 mkdir -p /tmp/update_script
-tar xvzf /tmp/update_script.tar.gz --strip=1 -C /tmp/update_script
+tar xvzf /tmp/update_script.tgz --strip=1 -C /tmp/update_script
 cd /tmp/update_script
 sh install
 ```
-
-### TODO
-
-- [x] Add .gitignore
-- [x] Add a check requirements function in the update_wrapper that checks for a user's privilege. If the user has no privilege, do not start the process. If yes, then call the update.
-- [x] Remove the logic for the update_wrapper for the scheduling of the "job" as we will leverage on cron scheduled scripts.
-- [x] Remove all the scheduler logic from the installer and add an insert into the cron schedule.
