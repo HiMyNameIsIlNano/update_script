@@ -19,11 +19,17 @@ mkdir -p ${default_dir}
 
 cp update_ports ${default_dir}
 chmod +x ${default_dir}/update_ports
-cp update.config ${default_dir}
+if [ ! -f ${default_dir}/update.config ]
+then
+    cp update.config ${default_dir}
+fi
 
 cp update_world ${default_dir}
 chmod +x ${default_dir}/update_world
-cp update_world.config ${default_dir}
+if [ ! -f ${default_dir}/update_world.config ]
+then
+    cp update_world.config ${default_dir}
+fi
 
 cp update_pkg ${default_dir}
 chmod +x ${default_dir}/update_pkg
@@ -65,8 +71,8 @@ crontab -l > /tmp/current_crontab.tmp
 n_changed_lines=$(diff /tmp/current_crontab.tmp /tmp/crontab_${timestamp}.tmp | wc -l)
 if [ ${n_changed_lines} -gt 0 ]
 then
-echo -e "${RED}***${NC} Using ${GREEN}sdiff${NC} to merge crontab files ${RED}***${NC}"
-echo -e "Type ${ORANGE}'l | 1'${NC} to accept the left changes or ${ORANGE}'r | 2'${NC} to accept the right changes: "
+    echo -e "${RED}***${NC} Using ${GREEN}sdiff${NC} to merge crontab files ${RED}***${NC}"
+    echo -e "Type ${ORANGE}'l | 1'${NC} to accept the left changes or ${ORANGE}'r | 2'${NC} to accept the right changes: "
 fi
 
 # Merge the changes into a final file
