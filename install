@@ -6,15 +6,18 @@ __read_property(){
 	echo ${temp##*|}
 }
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+ORANGE='\033[0;33m'
+NC='\033[0m' # No Color
+
 default_dir=${HOME}/.local/scripts
 config_file=${default_dir}/update.config
 timestamp=$(date +%s)
-update_ports_frequency_in_days=$(__read_property update_ports_frequency_in_days)
-update_world_frequency_in_days=$(__read_property update_world_frequency_in_days)
 
 mkdir -p ${default_dir}
 
-cp update ${default_dir}
+cp update_ports ${default_dir}
 chmod +x ${default_dir}/update_ports
 cp update.config ${default_dir}
 
@@ -26,6 +29,10 @@ cp update_pkg ${default_dir}
 chmod +x ${default_dir}/update_pkg
 
 cp update_wrapper ${default_dir}
+chmod +x ${default_dir}/update_wrapper
+
+update_ports_frequency_in_days=$(__read_property update_ports_frequency_in_days)
+update_world_frequency_in_days=$(__read_property update_world_frequency_in_days)
 
 cat >> /tmp/crontab_${timestamp}.tmp <<'EOF'
 SHELL=/bin/sh
@@ -33,11 +40,11 @@ PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin
 DISPLAY=:0.0
 # Order of crontab fields
 # minute	hour	mday	month	wday	command
-* * */${update_ports_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -p >/dev/null 2>&1
-* * */${update_world_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -w >/dev/null 2>&1
 EOF
+echo "* * */${update_ports_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -p >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
+echo "* * */${update_world_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -w >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
 
-crontab -l
+crontab -l >/dev/null 2>&1
 if [ $? -eq 1 ]
 then
     # No crontab existing. Create an empty file
@@ -48,20 +55,27 @@ DISPLAY=:0.0
 # Order of crontab fields
 # minute	hour	mday	month	wday	command
 EOF
-    cat empty_crontab_${timestamp}.tmp | crontab -
-    rm empty_crontab_${timestamp}.tmp
+    cat /tmp/empty_crontab_${timestamp}.tmp | crontab -
+    rm /tmp/empty_crontab_${timestamp}.tmp
 fi
 
 # Copy the current crontab into a temporary file
 crontab -l > /tmp/current_crontab.tmp
 
+n_changed_lines=$(diff /tmp/current_crontab.tmp /tmp/crontab_${timestamp}.tmp | wc -l)
+if [ ${n_changed_lines} -gt 0 ]
+then
+echo -e "${RED}***${NC} Using ${GREEN}sdiff${NC} to merge crontab files ${RED}***${NC}"
+echo -e "Type ${ORANGE}'l | 1'${NC} to accept the left changes or ${ORANGE}'r | 2'${NC} to accept the right changes: "
+fi
+
 # Merge the changes into a final file
-sdiff -o /tmp/current_crontab.final /tmp/current_crontab.tmp /tmp/crontab_${timestamp}.tmp
+sdiff -s -o /tmp/current_crontab.final /tmp/current_crontab.tmp /tmp/crontab_${timestamp}.tmp
 
 # We do not need to append anything as the crontab has already been merged
-# (crontab -l; cat /tmp/current_crontab.final | crontab -
+#(crontab -l; cat /tmp/current_crontab.final) | crontab -
 
-# Put the merged entries into the crontab file
+# Put the merged entries into the crontab file (overwrite old crontab)
 cat /tmp/current_crontab.final | crontab -
 
 # Check the crontab file before ending the script
