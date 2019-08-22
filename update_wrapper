@@ -40,7 +40,7 @@ __is_user_allowed_to_update(){
 	fi
 }
 
-default_dir=${HOME}/.local/scripts
+default_dir=${HOME}/.local/update_script/scripts
 config_file=${default_dir}/update.config
 config_world_file=${default_dir}/update_world.config
 update_ports_log=${default_dir}/update_ports.log

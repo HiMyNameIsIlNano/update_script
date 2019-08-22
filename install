@@ -11,7 +11,7 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
 
-default_dir=${HOME}/.local/scripts
+default_dir=${HOME}/.local//update_script/scripts
 config_file=${default_dir}/update.config
 timestamp=$(date +%s)
 
@@ -47,8 +47,8 @@ DISPLAY=:0.0
 # Order of crontab fields
 # minute	hour	mday	month	wday	command
 EOF
-echo "* * */${update_ports_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -p >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
-echo "* * */${update_world_frequency_in_days} * * ${HOME}/.local/scripts/update_wrapper -w >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
+echo "* * */${update_ports_frequency_in_days} * * ${default_dir}/update_wrapper -p >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
+echo "* * */${update_world_frequency_in_days} * * ${default_dir}/update_wrapper -w >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
 
 crontab -l >/dev/null 2>&1
 if [ $? -eq 1 ]
