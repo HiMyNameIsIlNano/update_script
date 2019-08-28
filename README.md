@@ -19,3 +19,8 @@ tar xvzf /tmp/update_script.tgz --strip=1 -C /tmp/update_script
 cd /tmp/update_script
 sh install
 ```
+
+### TODO
+
+- [] Fix missing terminal notification
+- [] Update to jdk 11
