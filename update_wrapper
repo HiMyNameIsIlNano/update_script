@@ -88,8 +88,6 @@ if [ "${batch_update_flag}" == "true" ]; then
 fi
 
 if [ "${f_port}" == "true" ]; then
-	__confirm
-
 	if [ "${update_with}" == "pkg" ]; then
 		#xterm -title "Update Ports with PKG" -e su root -c "${HOME}/.local/scripts/update_pkg"
 		${xterm} -title "Update Ports with PKG" -hold -e "${HOME}/.local/scripts/update_pkg"
@@ -102,7 +100,6 @@ if [ "${f_port}" == "true" ]; then
 fi
 
 if [ "${f_world}" == "true" ]; then
-	__confirm
 	${xterm} -title "Update World" -hold -e su root -c "${HOME}/.local/scripts/update_world -c ${config_world_file}"
 fi
 
