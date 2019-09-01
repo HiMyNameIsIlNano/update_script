@@ -18,6 +18,7 @@ while [ "$1" != "" ]; do
                                 update_with=$1
                                 f_port="true"
                                 f_world="false"
+                                shift
                                 ;;
         -w | --world )          shift
                                 f_world="true"
