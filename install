@@ -37,6 +37,9 @@ chmod +x ${default_dir}/update_pkg
 cp update_wrapper ${default_dir}
 chmod +x ${default_dir}/update_wrapper
 
+cp update_with_xterm ${default_dir}
+chmod +x ${default_dir}/update_with_xterm
+
 update_ports_frequency_in_days=$(__read_property update_ports_frequency_in_days)
 update_world_frequency_in_days=$(__read_property update_world_frequency_in_days)
 
