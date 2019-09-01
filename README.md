@@ -23,4 +23,4 @@ sh install
 ### TODO
 
 - [] Fix missing terminal notification
-- [] Update to jdk 11
+- [] Do not overwrite user config when installing/updating
