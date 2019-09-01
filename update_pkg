@@ -32,8 +32,9 @@ __check_remote_changes() {
 	fi
 }
 
-default_dir=${HOME}/.local//update_script/scripts/update_scripts
+default_dir=${HOME}/.local/scripts/update_script
 config_file=${default_dir}/update.config
+# TODO: Find a better name!
 sudo=$(command -v sudo)
 pkg=$(command -v pkg)
 
@@ -51,10 +52,6 @@ while [ "$1" != "" ]; do
     esac
     shift
 done
-
-default_dir=${HOME}/.local/scripts/update_script
-log_file=${default_dir}/update_ports.log
-today=$(date '+%s')
 
 # The list of locked ports must be comma separated with no empty space
 locked_ports=$(__read_property locked_ports)
@@ -88,5 +85,4 @@ __wait_for_input
 ${sudo} ${pkg} clean
 __wait_for_input
 
-echo ${today} > ${log_file}
 exit 0
