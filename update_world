@@ -20,7 +20,7 @@ __read_property(){
 timestamp=$(date +%s)
 step=1
 executed_step=1
-config_file=${HOME}/.local/scripts/update_scripts/update_world.config
+config_file=${HOME}/.local/scripts/update_script/update_world.config
 log_file=/tmp/update_world.log
 today=$(date '+%s')
 
