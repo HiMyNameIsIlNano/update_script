@@ -40,7 +40,7 @@ if [ "${f_port}" == "true" ]; then
         exit 1
     fi
 elif [ "${f_world}" == "true" ]; then
-    ${__xterm} -title "Update World" -hold -e su root -c "${HOME}/.local/scripts/update_world -c ${config_world_file}"
+    ${__xterm} -title "Update World" -hold -e su root -c "${default_dir}/update_world -c ${config_world_file}"
 else
     echo "[ERROR] Option not recognised"
     exit 1
