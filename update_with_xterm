@@ -1,0 +1,49 @@
+#!/bin/sh
+
+# Print out the help
+__usage(){
+    echo "usage: update_with_xterm [-p [pkg|port] | [-w | [-h]]]"
+}
+
+default_dir=${HOME}/.local/update_script/scripts/update_scripts
+config_world_file=${default_dir}/update_world.config
+update_with="pkg"
+f_port="true"
+f_world="false"
+__xterm=/usr/local/bin/xterm
+
+while [ "$1" != "" ]; do
+    case $1 in
+        -p | --ports )			shift
+                                update_with=$1
+                                f_port="true"
+                                f_world="false"
+                                ;;
+        -w | --world )          shift
+                                f_world="true"
+                                f_port="false"
+                                ;;
+        -h | --help )           __usage
+                                exit
+                                ;;
+        * )                     __usage
+                                exit 1
+    esac
+done
+
+if [ "${f_port}" == "true" ]; then
+    if [ "${update_with}" == "pkg" ]; then
+        ${__xterm} -title "Update Ports with PKG" -hold -e "${default_dir}/update_pkg"
+    elif [ "${update_with}" == "ports" ]; then
+        ${__xterm} -title "Update Ports with PORTS" -hold -e "${default_dir}/update_ports"
+    else
+        exit 1
+    fi
+elif [ "${f_world}" == "true" ]; then
+    ${__xterm} -title "Update World" -hold -e su root -c "${HOME}/.local/scripts/update_world -c ${config_world_file}"
+else
+    echo "[ERROR] Option not recognised"
+    exit 1
+fi
+
+exit 0

@@ -32,7 +32,7 @@ __check_remote_changes() {
 	fi
 }
 
-default_dir=${HOME}/.local//update_script/scripts
+default_dir=${HOME}/.local//update_script/scripts/update_scripts
 config_file=${default_dir}/update.config
 sudo=$(command -v sudo)
 pkg=$(command -v pkg)

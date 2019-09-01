@@ -11,7 +11,7 @@ GREEN='\033[0;32m'
 ORANGE='\033[0;33m'
 NC='\033[0m' # No Color
 
-default_dir=${HOME}/.local//update_script/scripts
+default_dir=${HOME}/.local//update_script/scripts/update_scripts
 config_file=${default_dir}/update.config
 timestamp=$(date +%s)
 
