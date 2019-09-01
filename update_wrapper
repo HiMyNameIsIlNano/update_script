@@ -53,7 +53,7 @@ __call_bash(){
     echo "TODO"
 }
 
-default_dir=${HOME}/.local/update_script/scripts/update_scripts
+default_dir=${HOME}/.local/scripts/update_scripts
 config_file=${default_dir}/update.config
 batch_update=''
 f_port="true"

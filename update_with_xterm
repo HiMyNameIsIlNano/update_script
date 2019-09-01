@@ -5,7 +5,7 @@ __usage(){
     echo "usage: update_with_xterm [-p [pkg|port] | [-w | [-h]]]"
 }
 
-default_dir=${HOME}/.local/update_script/scripts/update_scripts
+default_dir=${HOME}/.local/scripts/update_scripts
 config_world_file=${default_dir}/update_world.config
 update_with="pkg"
 f_port="true"

@@ -52,7 +52,7 @@ while [ "$1" != "" ]; do
     shift
 done
 
-default_dir=${HOME}/.local/scripts
+default_dir=${HOME}/.local/scripts/update_scripts
 log_file=${default_dir}/update_ports.log
 today=$(date '+%s')
 
