@@ -10,7 +10,6 @@ config_world_file=${default_dir}/update_world.config
 update_with="pkg"
 f_port="true"
 f_world="false"
-__xterm=/usr/local/bin/xterm
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -34,14 +33,14 @@ done
 
 if [ "${f_port}" == "true" ]; then
     if [ "${update_with}" == "pkg" ]; then
-        ${__xterm} -title "Update Ports with PKG" -hold -e "${default_dir}/update_pkg"
+        xterm -title "Update Ports with PKG" -hold -e "${default_dir}/update_pkg"
     elif [ "${update_with}" == "ports" ]; then
-        ${__xterm} -title "Update Ports with PORTS" -hold -e "${default_dir}/update_ports"
+        xterm -title "Update Ports with PORTS" -hold -e "${default_dir}/update_ports"
     else
         exit 1
     fi
 elif [ "${f_world}" == "true" ]; then
-    ${__xterm} -title "Update World" -hold -e su root -c "${default_dir}/update_world -c ${config_world_file}"
+    xterm -title "Update World" -hold -e su root -c "${default_dir}/update_world -c ${config_world_file}"
 else
     echo "[ERROR] Option not recognised"
     exit 1

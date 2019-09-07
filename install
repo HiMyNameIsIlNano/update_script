@@ -45,7 +45,7 @@ update_world_frequency_in_days=$(__read_property update_world_frequency_in_days)
 
 cat >> /tmp/crontab_${timestamp}.tmp <<'EOF'
 SHELL=/bin/sh
-PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin
+PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
 DISPLAY=:0.0
 # Order of crontab fields
 # minute	hour	mday	month	wday	command
@@ -59,7 +59,7 @@ then
     # No crontab existing. Create an empty file
     cat >> /tmp/empty_crontab_${timestamp}.tmp <<'EOF'
 SHELL=/bin/sh
-PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin
+PATH=/etc:/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin
 DISPLAY=:0.0
 # Order of crontab fields
 # minute	hour	mday	month	wday	command

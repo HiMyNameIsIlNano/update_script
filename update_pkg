@@ -35,8 +35,8 @@ __check_remote_changes() {
 default_dir=${HOME}/.local/scripts/update_script
 config_file=${default_dir}/update.config
 # TODO: Find a better name!
-sudo=$(command -v sudo)
-pkg=$(command -v pkg)
+#sudo=$(command -v sudo)
+#pkg=$(command -v pkg)
 
 while [ "$1" != "" ]; do
     case $1 in
@@ -57,17 +57,17 @@ done
 locked_ports=$(__read_property locked_ports)
 for locked_port in $(echo $locked_ports | sed "s/,/ /g")
 do
-    ${sudo} ${pkg} lock $locked_port
+    sudo pkg lock $locked_port
 	__wait_for_input
 done
 
-${sudo} ${pkg} stats
+sudo pkg stats
 __wait_for_input
 	
-${sudo} ${pkg} update
+sudo pkg update
 __wait_for_input
 
-${sudo} ${pkg} upgrade
+sudo pkg upgrade
 __wait_for_input
 
 # Even though the n option is listed in the pkg check manual, it does not seem to be a recognized option anyway...
@@ -76,13 +76,13 @@ __wait_for_input
 #wait_for_input
 
 echo "Checking for corrupted packages..."
-${sudo} ${pkg} check -sa
+sudo pkg check -sa
 __wait_for_input
 
-${sudo} ${pkg} autoremove
+sudo pkg autoremove
 __wait_for_input
 
-${sudo} ${pkg} clean
+sudo pkg clean
 __wait_for_input
 
 exit 0

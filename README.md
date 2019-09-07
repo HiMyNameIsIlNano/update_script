@@ -22,5 +22,4 @@ sh install
 
 ### TODO
 
-- [] Fix missing terminal notification
-- [] Do not overwrite user config when installing/updating
+- [] add here

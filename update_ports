@@ -19,11 +19,11 @@ f_batch="false"
 log_file=/tmp/update_script.log
 today=$(date '+%s')
 
-freebsd-update=$(command -v freebsd-update)
-portsnap=$(command -v portsnap)
-pkg=$(command -v pkg)
-portupgrade=$(command -v portupgrade)
-portsclean=$(command -v portsclean)
+#freebsd-update=$(command -v freebsd-update)
+#portsnap=$(command -v portsnap)
+#pkg=$(command -v pkg)
+#portupgrade=$(command -v portupgrade)
+#portsclean=$(command -v portsclean)
 
 
 while [ "$1" != "" ]; do
@@ -56,8 +56,8 @@ if [ "${f_sec}" == "true" ]
 then
 	# Security updates to be checked
 	printf 'Downloading and installing security patch(es)'
-	${freebsd-update} fetch
-	${freebsd-update} install
+	freebsd-update fetch
+	freebsd-update install
 	printf 'press [ENTER] to continue'
 	read dummy
 fi
@@ -76,21 +76,21 @@ then
 		fi
 
 		# fetch the updates
-		${freebsd-update} fetch update
+		freebsd-update fetch update
 		if [ "${f_batch}" == "true" ]
 		then
 			__wait_for_input
 		fi
 
 		# list the packages that needs to be updated
-		${pkg} version -l "<"
+		pkg version -l "<"
 		if [ "${f_batch}" == "true" ]
 		then
 			__wait_for_input
 		fi
 
 		# fix DB and remove inconsistencies
-		${pkg} check -dB -av
+		pkg check -dB -av
 		if [ "${f_batch}" == "true" ]
 		then
 			__wait_for_input
@@ -98,10 +98,10 @@ then
 	fi
 
 	# upgrade all the ports
-	${portupgrade} -ac
+	portupgrade -ac
 	echo ${today} > ${log_file}
-	${portupgrade} -D
-	${portupgrade} -DD
+	portupgrade -D
+	portupgrade -DD
 fi
 
 exit 0

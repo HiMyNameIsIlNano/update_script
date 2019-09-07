@@ -82,7 +82,6 @@ update_with=$(__read_property update_with)
 updater_group=$(__read_property updater_group)
 with_terminal=$(__read_property with_terminal)
 is_user_allowed_to_update=$(__is_user_allowed_to_update ${updater_group})
-xterm=$(command -v xterm)
 
 if [ "${is_user_allowed_to_update}" == "false" ]; then
     __end
