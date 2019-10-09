@@ -43,6 +43,9 @@ while [ "$1" != "" ]; do
 		-b | --batch )			shift
 								f_batch="true"
 								;;
+        -o | --output )			shift
+								log_file=$1
+								;;
         -h | --help )           __usage
                                 exit
                                 ;;
@@ -104,4 +107,5 @@ then
 	portupgrade -DD
 fi
 
+echo ${today} > ${log_file}
 exit 0

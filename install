@@ -50,8 +50,8 @@ DISPLAY=:0.0
 # Order of crontab fields
 # minute	hour	mday	month	wday	command
 EOF
-echo "* * */${update_ports_frequency_in_days} * * ${default_dir}/update_wrapper -p >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
-echo "* * */${update_world_frequency_in_days} * * ${default_dir}/update_wrapper -w >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
+echo "@daily ${default_dir}/update_wrapper -p >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
+echo "@daily ${default_dir}/update_wrapper -w >/dev/null 2>&1" >> /tmp/crontab_${timestamp}.tmp
 
 crontab -l >/dev/null 2>&1
 if [ $? -eq 1 ]

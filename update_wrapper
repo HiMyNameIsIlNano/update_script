@@ -97,7 +97,6 @@ if [ "${batch_update_flag}" == "true" ]; then
 	batch_update='-b'
 fi
 
-
 if [ "${with_terminal}" == "xterm" ]; then
     __call_xterm ${update_with}
 elif [ "${with_terminal}" == "bash" ]; then

@@ -5,8 +5,35 @@ __usage(){
     echo "usage: update_with_xterm [-p [pkg|port] | [-w | [-h]]]"
 }
 
+__read_property(){
+	local config_file="$1"
+	local input="$2"
+	temp=`cat ${config_file} | sed 's/\"//g' | grep -w ${input} | cut -d ":" -f2`
+	echo ${temp##*|}
+}
+
 default_dir=${HOME}/.local/scripts/update_script
+config_ports_file=${default_dir}/update_ports.config
+update_ports_log=${default_dir}/update_ports.log
+update_world_log=${default_dir}/update_world.log
+
+last_exec_update_ports=0
+update_ports_frequency=-1
+if [ -f ${update_ports_log} ]; then
+    last_exec_update_ports=$(head -n 1 ${update_ports_log})
+    update_ports_frequency=$(__read_property ${config_ports_file} update_ports_frequency_in_days)
+fi
+
 config_world_file=${default_dir}/update_world.config
+
+last_exec_update_world=0
+update_world_frequency=-1
+if [ -f ${update_world_log} ]; then
+    last_exec_update_world=$(head -n 1 ${update_world_log})
+    update_world_frequency=$(__read_property ${config_world_file} update_world_frequency_in_days)
+fi
+
+today=$(date '+%s')
 update_with="pkg"
 f_port="true"
 f_world="false"
@@ -32,15 +59,25 @@ while [ "$1" != "" ]; do
 done
 
 if [ "${f_port}" == "true" ]; then
-    if [ "${update_with}" == "pkg" ]; then
-        xterm -title "Update Ports with PKG" -hold -e "${default_dir}/update_pkg"
-    elif [ "${update_with}" == "ports" ]; then
-        xterm -title "Update Ports with PORTS" -hold -e "${default_dir}/update_ports"
-    else
-        exit 1
+    days=$(( (today - last_exec_update_ports) / 86400 ))
+    echo "Last update ports executed" ${days} "days ago"
+
+    if [ ${days} -gt ${update_ports_frequency} ]; then
+        if [ "${update_with}" == "pkg" ]; then
+            xterm -title "Update Ports with PKG" -hold -e "${default_dir}/update_pkg -o ${update_ports_log}"
+        elif [ "${update_with}" == "ports" ]; then
+            xterm -title "Update Ports with PORTS" -hold -e "${default_dir}/update_ports -o ${update_ports_log}"
+        else
+            exit 1
+        fi
     fi
 elif [ "${f_world}" == "true" ]; then
-    xterm -title "Update World" -hold -e su root -c "${default_dir}/update_world -c ${config_world_file}"
+    days=$(( (today - last_exec_update_world) / 86400 ))
+    echo "Last update world executed" ${days} "days ago"
+
+    if [ ${days} -gt $update_world_frequency ]; then
+        xterm -title "Update World" -hold -e su root -c "${default_dir}/update_world -o ${update_world_log}"
+    fi
 else
     echo "[ERROR] Option not recognised"
     exit 1

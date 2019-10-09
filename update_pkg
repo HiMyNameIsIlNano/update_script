@@ -33,7 +33,7 @@ __check_remote_changes() {
 }
 
 default_dir=${HOME}/.local/scripts/update_script
-config_file=${default_dir}/update.config
+config_file=${default_dir}/update_ports.config
 # TODO: Find a better name!
 #sudo=$(command -v sudo)
 #pkg=$(command -v pkg)
