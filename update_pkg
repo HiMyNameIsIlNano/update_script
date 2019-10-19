@@ -32,6 +32,7 @@ __check_remote_changes() {
 	fi
 }
 
+today=$(date '+%s')
 default_dir=${HOME}/.local/scripts/update_script
 config_file=${default_dir}/update_ports.config
 # TODO: Find a better name!
@@ -44,6 +45,9 @@ while [ "$1" != "" ]; do
                                 config_file=$1
                                 echo $config_file
                                 ;;
+        -o | --output )			shift
+								log_file=$1
+								;;
         -h | --help )           __usage
                                 exit
                                 ;;
@@ -85,4 +89,5 @@ __wait_for_input
 sudo pkg clean
 __wait_for_input
 
+echo ${today} > ${log_file}
 exit 0

@@ -23,6 +23,10 @@ if [ ! -f ${default_dir}/update.config ]
 then
     cp update.config ${default_dir}
 fi
+if [ ! -f ${default_dir}/update_ports.config ]
+then
+    cp update_ports.config ${default_dir}
+fi
 
 cp update_world ${default_dir}
 chmod +x ${default_dir}/update_world
