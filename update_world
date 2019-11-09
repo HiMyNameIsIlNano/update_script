@@ -2,25 +2,54 @@
 
 # Start functions
 # Print out the help
-usage(){
+__usage(){
     echo "usage: update_world [-c | [-ue | [-s step_id [-su | [-h]]]]]"
 }
 
-confirm(){
+__confirm(){
 	printf 'press [ENTER] to continue'
 	read dummy
 }
 
-read_property(){
+__reinstall_all_programs_and_utilities(){
+	read -p "Which system do you use? [PORTS = 1/PKGS = 2]: " choice
+	if [ ${choice} -lt 1 -o ${choice} -gt 2  ]
+	then
+	  echo "Options not recognised"
+    return
+	fi
+
+	/etc/rc.d/netif
+  __confirm
+  dhclient $wlan_if
+  __confirm
+
+	if [ ${choice} -eq 1 ]
+	then
+	  __reinstall_all_ports
+	elif [ ${choice} -eq 2 ]
+	  __reinstall_all_pkgs
+	fi
+}
+
+__reinstall_all_ports(){
+	portupgrade -fa
+}
+
+__reinstall_all_pkgs(){
+	pkg upgrade -f
+}
+
+__read_property(){
 	input="$@"
-	temp=`cat $config_file | sed 's/\"//g' | grep -w $input | cut -d ":" -f2`
+	temp=`cat ${config_file} | sed 's/\"//g' | grep -w ${input} | cut -d ":" -f2`
 	echo ${temp##*|}
 }
 
 timestamp=$(date +%s)
 step=1
 executed_step=1
-config_file="update_world.config"
+config_file=${HOME}/.local/scripts/update_script/update_world.config
 log_file=/tmp/update_world.log
 today=$(date '+%s')
 
@@ -34,6 +63,9 @@ while [ "$1" != "" ]; do
     	-c | --config-file)		shift
                                 config_file=$1
                                 ;;
+        -o | --output )			shift
+								log_file=$1
+								;;
 		-ue | --update-existing) shift
                                 f_update_existing="true"
                                 f_update="false"
@@ -47,27 +79,27 @@ while [ "$1" != "" ]; do
                                 f_singleuser="true"
                                 f_update="false"
                                 ;;
-        -h | --help )           usage
+        -h | --help )           __usage
                                 exit
                                 ;;
-        * )                     usage
+        * )                     __usage
                                 exit 1
     esac
     shift
 done
 
 # properties="server version branch log folders_to_backup kernel src dest arch"
-server=$(read_property server)
-version=$(read_property version)
-branch=$(read_property branch)
-log=$(read_property log)
-folders_to_backup=$(read_property folders_to_backup)
-src=$(read_property src)
-kernel=$(read_property kernel)
-dest=$(read_property dest)
-arch=$(read_property arch)
-wlan_if=$(read_property wlan_if)
-keyboard_layout=$(read_property keyboard_layout)
+server=$(__read_property server)
+version=$(__read_property version)
+branch=$(__read_property branch)
+log=$(__read_property log)
+folders_to_backup=$(__read_property folders_to_backup)
+src=$(__read_property src)
+kernel=$(__read_property kernel)
+dest=$(__read_property dest)
+arch=$(__read_property arch)
+wlan_if=$(__read_property wlan_if)
+keyboard_layout=$(__read_property keyboard_layout)
 
 if [ "${f_update}" == "true" ]
 then		
@@ -77,7 +109,7 @@ then
 		if [ -f "$src/sys/$arch/conf/$kernel" ] 
 		then
 			echo "Backing-up Kernel to" $dest
-			confirm
+			__confirm
 			cp $src/sys/$arch/conf/$kernel $dest/
 		else
 			echo "File $src/sys/$arch/conf/$kernel does not exist."
@@ -87,7 +119,7 @@ then
 		if [ -d /usr/src ] 
 		then 
 			echo "Backing-up /usr/src to" $dest/src$timestamp
-			confirm
+			__confirm
 			mv $src $dest/src$timestamp
 		else
 			echo "File $src/sys/$arch/conf/$kernel does not exist."
@@ -101,7 +133,7 @@ then
 				# It gets the folder name from the full path
 				folder=$(basename $folder_with_full_path)
 				echo "Backing-up" $folder_with_full_path"/ to" $dest"/"$folder$timestamp 
-				confirm
+				__confirm
 				mkdir -p $dest/$folder$timestamp
 				cp -rv $folder_with_full_path/ $dest/$folder$timestamp
 			else
@@ -120,17 +152,17 @@ then
 		if [ "${f_update_existing}" == "false" ]
 		then				
 			echo "Step 2) Checkout Freebsd sources" $branch "version " $version
-			confirm
+			__confirm
 			svn checkout https://$server/base/$branch/$version/ $src
 		fi
 		# For all the other updates
 		if [ "${f_update_existing}" == "true" ]
 		then		
 			echo "Step 2) Updating Freebsd sources" $branch "version " $version
-			confirm
+			__confirm
 			svn update $src
 		fi
-		confirm
+		__confirm
 	else
 		echo "Skipped Step 2)"
 	fi
@@ -143,7 +175,7 @@ then
 		echo "Step 3) Perform various cleaning before building world" 
 		chflags -R noschg /usr/obj/*
 		rm -rf /usr/obj
-		confirm
+		__confirm
 	else
 		echo "Skipped Step 3)"
 	fi
@@ -156,7 +188,7 @@ then
 	then
 		echo "Step 4) Building World"
 		make buildworld
-		confirm
+		__confirm
 	else
 		echo "Skipped Step 4)"
 	fi
@@ -167,7 +199,7 @@ then
 	then
 		echo "Step 5) Building Kernel"
 		make buildkernel KERNCONF=$kernel
-		confirm
+		__confirm
 	else
 		echo "Skipped Step 5)"
 	fi
@@ -178,7 +210,7 @@ then
 	then	
 		echo "Step 6) Installing Kernel"
 		make installkernel KERNCONF=$kernel
-		confirm
+		__confirm
 	else
 		echo "Skipped Step 6)"
 	fi
@@ -187,7 +219,7 @@ then
 
 	echo "Step 7) Reboot the system in single user mode..."
 	echo "Once in single user mode, execute the following command 'mount -u / && mount -a -t ufs' and then run '%install_dir%/update_world -su'" 
-	confirm
+	__confirm
 	shutwdown -h now
 fi
 
@@ -200,19 +232,19 @@ then
 
 	echo "Mounting Swap Partition"
 	swapon -a
-	confirm
+	__confirm
 
-	echo "Keyboar Layout changed to" $keyboard_layout
+	echo "Keyboard Layout changed to" $keyboard_layout
 	setxkbmap $keyboard_layout
-	confirm
+	__confirm
 
 	echo "Fixing Timezone"
 	adjkerntz -i
-	confirm
+	__confirm
 
 	echo "Start merging"
 	mergemaster -p
-	confirm
+	__confirm
 
 	echo "Installing World"
 	cd $src
@@ -223,14 +255,16 @@ then
 	make delete-old
 	make delete-old-libs
 
-	read -p "Do you want to recompile all ports? (y/n): " answer
-    case $answer in
-        [Yy]* ) /etc/rc.d/netif;
-				confirm;
-				dhclient $wlan_if
-				confirm;
-				portupgrade -fa
-				break;;
-        [Nn]* ) exit;;
-    esac
+	read -p "Do you want to reinstall all programs and utilities on this PC? [Y/n]: " answer
+  case $answer in
+      [Yy]* )
+        __reinstall_all_programs_and_utilities
+        break;;
+      [Nn]* ) exit;;
+  esac
+
+  # TODO: this will most likely not work in single user mode a the path is not mounted
+  echo ${today} > ${log_file}
 fi
+
+exit 0
