@@ -85,9 +85,6 @@ fi
 # Merge the changes into a final file
 sdiff -s -o /tmp/current_crontab.final /tmp/current_crontab.tmp /tmp/crontab_${timestamp}.tmp
 
-# We do not need to append anything as the crontab has already been merged
-#(crontab -l; cat /tmp/current_crontab.final) | crontab -
-
 # Put the merged entries into the crontab file (overwrite old crontab)
 cat /tmp/current_crontab.final | crontab -
 
