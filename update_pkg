@@ -1,35 +1,18 @@
 #!/bin/sh
 
-__usage(){
-    echo "usage: update_pkg [-c | [-h]]"
+__usage() {
+  echo "usage: update_pkg [-c | [-h]]"
 }
 
-__wait_for_input(){
-	printf 'press [ENTER] to continue'
-	read dummy
+__wait_for_input() {
+  printf 'press [ENTER] to continue'
+  read dummy
 }
 
-__read_property(){
-	input="$@"
-	temp=`cat $config_file | sed 's/\"//g' | grep -w $input | cut -d ":" -f2`
-	echo ${temp##*|}
-}
-
-__check_remote_changes() {
-	UPSTREAM=${1:-'@{u}'}
-	LOCAL=$(git rev-parse @)
-	REMOTE=$(git rev-parse "$UPSTREAM")
-	BASE=$(git merge-base @ "$UPSTREAM")
-
-	if [ $LOCAL = $REMOTE ]; then
-		echo "Up-to-date"
-	elif [ $LOCAL = $BASE ]; then
-		echo "Need to pull"
-	elif [ $REMOTE = $BASE ]; then
-		echo "Need to push"
-	else
-		echo "Diverged"
-	fi
+__read_property() {
+  input="$@"
+  temp=$(cat $config_file | sed 's/\"//g' | grep -w $input | cut -d ":" -f2)
+  echo ${temp##*|}
 }
 
 today=$(date '+%s')
@@ -40,34 +23,38 @@ config_file=${default_dir}/update_ports.config
 #pkg=$(command -v pkg)
 
 while [ "$1" != "" ]; do
-    case $1 in
-		-c | --config )		    shift
-                                config_file=$1
-                                echo $config_file
-                                ;;
-        -o | --output )			shift
-								log_file=$1
-								;;
-        -h | --help )           __usage
-                                exit
-                                ;;
-        * )                     __usage
-                                exit 1
-    esac
+  case $1 in
+  -c | --config)
     shift
+    config_file=$1
+    echo $config_file
+    ;;
+  -o | --output)
+    shift
+    log_file=$1
+    ;;
+  -h | --help)
+    __usage
+    exit
+    ;;
+  *)
+    __usage
+    exit 1
+    ;;
+  esac
+  shift
 done
 
 # The list of locked ports must be comma separated with no empty space
 locked_ports=$(__read_property locked_ports)
-for locked_port in $(echo $locked_ports | sed "s/,/ /g")
-do
-    sudo pkg lock $locked_port
-	__wait_for_input
+for locked_port in $(echo $locked_ports | sed "s/,/ /g"); do
+  sudo pkg lock $locked_port
+  __wait_for_input
 done
 
 sudo pkg stats
 __wait_for_input
-	
+
 sudo pkg update
 __wait_for_input
 
@@ -89,5 +76,5 @@ __wait_for_input
 sudo pkg clean
 __wait_for_input
 
-echo ${today} > ${log_file}
+echo ${today} >${log_file}
 exit 0

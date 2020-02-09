@@ -75,7 +75,7 @@ elif [ "${f_world}" == "true" ]; then
     days=$(( (today - last_exec_update_world) / 86400 ))
     echo "Last update world executed" ${days} "days ago"
 
-    if [ ${days} -gt $update_world_frequency ]; then
+    if [[ ${days} -gt $update_world_frequency ]]; then
         xterm -title "Update World" -hold -e su root -c "${default_dir}/update_world -o ${update_world_log}"
     fi
 else

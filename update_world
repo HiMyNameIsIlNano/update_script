@@ -263,7 +263,7 @@ then
       [Nn]* ) exit;;
   esac
 
-  # TODO: this will most likely not work in single user mode a the path is not mounted
+  # TODO: this will most likely not work in single user mode as the path is not mounted
   echo ${today} > ${log_file}
 fi
 

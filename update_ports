@@ -1,13 +1,13 @@
 #!/bin/sh
 
 # Print out the help
-__usage(){
-    echo "usage: update_ports -p | [-c] | [-s] [-f] [-b] | [-h]"
+__usage() {
+  echo "usage: update_ports -p | [-c] | [-s] [-f] [-b] | [-h]"
 }
 
-__wait_for_input(){
-	printf 'press [ENTER] to continue'
-	read dummy
+__wait_for_input() {
+  printf 'press [ENTER] to continue'
+  read dummy
 }
 
 f_sec="false"
@@ -25,87 +25,88 @@ today=$(date '+%s')
 #portupgrade=$(command -v portupgrade)
 #portsclean=$(command -v portsclean)
 
-
 while [ "$1" != "" ]; do
-    case $1 in
-        -p | --ports )			shift
-                                f_port="true"
-                                ;;
-        -s | --security )       shift                          
-                                f_sec="true"
-                                ;;
-		-c | --continue )		shift
-								f_continue="true"
-								;;
-		-f | --force )			shift
-								f_force="true"
-								;;
-		-b | --batch )			shift
-								f_batch="true"
-								;;
-        -o | --output )			shift
-								log_file=$1
-								;;
-        -h | --help )           __usage
-                                exit
-                                ;;
-        * )                     __usage
-                                exit 1
-    esac
+  case $1 in
+  -p | --ports)
+    shift
+    f_port="true"
+    ;;
+  -s | --security)
+    shift
+    f_sec="true"
+    ;;
+  -c | --continue)
+    shift
+    f_continue="true"
+    ;;
+  -f | --force)
+    shift
+    f_force="true"
+    ;;
+  -b | --batch)
+    shift
+    f_batch="true"
+    ;;
+  -o | --output)
+    shift
+    log_file=$1
+    ;;
+  -h | --help)
+    __usage
+    exit
+    ;;
+  *)
+    __usage
+    exit 1
+    ;;
+  esac
 done
 
-# If the script has been called with the right set of arguments 
-if [ "${f_sec}" == "true" ]
-then
-	# Security updates to be checked
-	printf 'Downloading and installing security patch(es)'
-	freebsd-update fetch
-	freebsd-update install
-	printf 'press [ENTER] to continue'
-	read dummy
+# If the script has been called with the right set of arguments
+if [ "${f_sec}" == "true" ]; then
+  # Security updates to be checked
+  printf 'Downloading and installing security patch(es)'
+  freebsd-update fetch
+  freebsd-update install
+  printf 'press [ENTER] to continue'
+  read dummy
 fi
 
-if [ "${f_port}" == "true" ]
-then
-	# continue tells the script to skip further updates
-	# and go on updating from the last run
-	if [ "${f_continue}" == "false" ]
-	then
-		# This one gets rid of eventual db corruption
-		if [ "${f_force}" == "true" ]
-		then
-			rm -Rf /var/db/portsnap/
-			mkdir /var/db/portsnap
-		fi
+if [ "${f_port}" == "true" ]; then
+  # continue tells the script to skip further updates
+  # and go on updating from the last run
+  if [ "${f_continue}" == "false" ]; then
+    # This one gets rid of eventual db corruption
+    if [ "${f_force}" == "true" ]; then
+      rm -Rf /var/db/portsnap/
+      mkdir /var/db/portsnap
+    fi
 
-		# fetch the updates
-		freebsd-update fetch update
-		if [ "${f_batch}" == "true" ]
-		then
-			__wait_for_input
-		fi
+    # fetch the updates
+    freebsd-update fetch update
+    if [ "${f_batch}" == "true" ]; then
+      __wait_for_input
+    fi
 
-		# list the packages that needs to be updated
-		pkg version -l "<"
-		if [ "${f_batch}" == "true" ]
-		then
-			__wait_for_input
-		fi
+    # list the packages that needs to be updated
+    pkg version -l "<"
+    if [ "${f_batch}" == "true" ]; then
+      __wait_for_input
+    fi
 
-		# fix DB and remove inconsistencies
-		pkg check -dB -av
-		if [ "${f_batch}" == "true" ]
-		then
-			__wait_for_input
-		fi
-	fi
+    # fix DB and remove inconsistencies
+    pkg check -dB -av
+    if [ "${f_batch}" == "true" ]; then
+      __wait_for_input
+    fi
+  fi
 
-	# upgrade all the ports
-	portupgrade -ac
-	echo ${today} > ${log_file}
-	portupgrade -D
-	portupgrade -DD
+  # upgrade all the ports
+  portupgrade -ac
+  echo ${today} >${log_file}
+  portupgrade -D
+  portupgrade -DD
 fi
 
-echo ${today} > ${log_file}
+echo ${today} >${log_file}
 exit 0
